@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { 
   Banner,
-  Card, EmptyState, Form, FormLayout, Frame, Icon, Layout, Modal, 
+  Card, ChoiceList, EmptyState, Filters, Form, FormLayout, Frame, Icon, Layout, Modal, 
   Page, ResourceItem, ResourceList, Select, Stack, TextContainer, TextField, TextStyle, TopBar 
 } from '@shopify/polaris'
 import { ClockMinor, DeleteMinor, EditMinor, LogOutMinor } from '@shopify/polaris-icons'
@@ -21,12 +21,30 @@ const priorityOptions = [
   { label: 'Urgent', value: 4 },
 ]
 
+/**
+ * Map task priority value to its label.
+ * @param value 
+ * @returns priority label.
+ */
+function getPriorityLabel(value: number) {
+  return priorityOptions.find(o => o.value === value).label
+}
+
 const statusOptions = [
   { label: 'New', value: 1 },
   { label: 'Started', value: 2 },
   { label: 'Done', value: 3 },
   { label: 'Canceled', value: 4 },
 ]
+
+/**
+ * Map task status value to its label.
+ * @param value 
+ * @returns status label.
+ */
+function getStatusLabel(value: number) {
+  return statusOptions.find(o => o.value === value).label
+}
 
 /**
  * Initial value for a new task.
@@ -105,12 +123,37 @@ function getDateString(date: any) {
   return `${d}/${m}/${y}`
 }
 
+/**
+ * Filter the list of tasks by the provided filter query.
+ * 
+ * @param tasks Tasks list
+ * @param query Filter query
+ */
+function getFilteredTasks(tasks: ITask[], query: string) {
+  if ( !query || !query.trim().length )
+    return tasks
+
+  const _query = query.toLowerCase()
+
+  return tasks.filter(task => {
+    if ( task.title.toLowerCase().includes(_query) )
+      return true
+
+    if ( task.description && task.description.toLowerCase().includes(_query) )
+      return true
+
+    return false
+  })
+}
+
 
 export default function Signin() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   
   const [tasks, setTasks] = useState([])
+
+  const [filterQuery, setFilterQuery] = useState('')
 
   const [editDailogOpened, setEditDialogOpened] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -290,6 +333,99 @@ export default function Signin() {
   )
 
   /**
+   * Filters element
+   */
+  const [taskPriorities, setTaskPriorities] = useState([])
+  const [taskStatuses, setTaskStatuses] = useState([])
+
+  const filters = [
+    {
+      key: 'priority',
+      label: 'Priority',
+      filter: (
+        <ChoiceList 
+          title="Task Priority"
+          titleHidden
+          choices={priorityOptions as any}
+          selected={taskPriorities}
+          onChange={setTaskPriorities}
+          allowMultiple
+        />
+      ),
+      shortcut: true,
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      filter: (
+        <ChoiceList 
+          title="Task Status"
+          titleHidden
+          choices={statusOptions as any}
+          selected={taskStatuses}
+          onChange={setTaskStatuses}
+          allowMultiple
+        />
+      ),
+      shortcut: false,
+    },
+  ]
+
+  const appliedFilters = []
+
+  if (taskPriorities.length) {
+    const priorities = taskPriorities
+      .map(value => getPriorityLabel(value))
+      .join(', ')
+
+    appliedFilters.push({
+      key: 'priority',
+      label: `Task Priority: ${priorities}`,
+      onRemove: () => setTaskPriorities([]),
+    })
+  }
+  
+  if (taskStatuses.length) {
+    const statuses = taskStatuses
+      .map(value => getStatusLabel(value))
+      .join(', ')
+
+    appliedFilters.push({
+      key: 'status',
+      label: `Task Status: ${statuses}`,
+      onRemove: () => setTaskStatuses([]),
+    })
+  }
+
+  const filterControl = (
+    <Filters
+      queryValue={filterQuery}
+      filters={filters}
+      appliedFilters={appliedFilters}
+      disabled={!tasks.length}
+      onQueryChange={handleQueryChange}
+      onQueryClear={handleQueryClear}
+      onClearAll={handleClearAll}
+    />
+  )
+
+  function handleQueryChange(value) {
+    setFilterQuery(value)
+  }
+
+  function handleQueryClear() {
+    setFilterQuery('')
+  }
+
+  function handleClearAll() {
+    setFilterQuery('')
+    setTaskPriorities([])
+    setTaskStatuses([])
+  }
+
+  const filteredTasks = getFilteredTasks(tasks, filterQuery)
+
+  /**
    * Task edit form modal.
    */
   const editModal = editDailogOpened ? (
@@ -430,9 +566,10 @@ export default function Signin() {
 
               <Card>
                 <ResourceList 
-                  items={tasks}
+                  items={filteredTasks}
                   renderItem={renderTaskItem}
                   emptyState={emptyState}
+                  filterControl={filterControl}
                   loading={isLoading}
                 />
               </Card>
