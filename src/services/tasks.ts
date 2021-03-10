@@ -6,7 +6,8 @@ import {
 
 
 export function getTasks(): Promise<ITask[]> {
-  return apiAuthorizedGet('/api/tasks')
+  const params = { sort: ['-priority', 'due', '_id'].join(',') }
+  return apiAuthorizedGet('/api/tasks', params)
     .then(({ data: { data }}) => data)
 }
 

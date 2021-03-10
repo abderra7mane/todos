@@ -25,9 +25,16 @@ export default (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 function handleGetTasks(req: NextApiRequest, res: NextApiResponse) {
+  const { sort } = req.query
+  let querySort = ''
+
+  if ( typeof sort === 'string' ) {
+    querySort = sort.split(',').join(' ')
+  }
+
   return authorize(req)
     .then(({ user }) => 
-      getUserTasks(user).then((tasks) => {
+      getUserTasks(user, querySort).then((tasks) => {
         res.status(200).json({
           status: 'success',
           data: tasks

@@ -31,9 +31,9 @@ export function apiPost(url: string, data: any) {
   return axios.post(url, data).catch(axiosHandleError)
 }
 
-export function apiAuthorizedGet(url: string) {
+export function apiAuthorizedGet(url: string, params: any = {}) {
   const headers = getAuthorizedHeaders()
-  return axios.get(url, { headers }).catch(axiosHandleError)
+  return axios.get(url, { headers, params }).catch(axiosHandleError)
 }
 
 export function apiAuthorizedPost(url: string, data: any) {

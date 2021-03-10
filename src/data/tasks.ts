@@ -3,8 +3,8 @@ import ITask from "../models/Task"
 import { createQuery, deleteQuery, getQuery, updateOneQuery } from "./utils"
 
 
-export function getUserTasks(id: string): Promise<ITask[]> {
-  return getQuery({ query: { user: id } }, TaskModel)
+export function getUserTasks(id: string, sort: any = {}): Promise<ITask[]> {
+  return getQuery({ query: { user: id }, sort }, TaskModel)
 }
 
 export function createTask(user: string, task: ITask): Promise<string> {
