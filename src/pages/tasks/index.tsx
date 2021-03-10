@@ -61,6 +61,13 @@ const validationSchema = Yup.object({
 })
 
 
+/**
+ * Format the provided date value with the format 
+ * supported by 'date' input type (yyyy-MM-dd).
+ * 
+ * @param date Date value
+ * @returns date as a string
+ */
 function getInputDateString(date: any) {
   if ( !date ) return ''
 
@@ -69,13 +76,20 @@ function getInputDateString(date: any) {
 
   if ( isNaN(time) ) return ''
 
-  const y = _date.getFullYear(),
+  const y = `${_date.getFullYear()}`.padStart(4, '0'),
         m = `${_date.getMonth()}`.padStart(2, '0'),
         d = `${_date.getDate()}`.padStart(2, '0')
 
   return `${y}-${m}-${d}`
 }
 
+/**
+ * Format the provided date using 'dd/MM/yyyy' format,
+ * to be displayed in task list.
+ * 
+ * @param date Date value
+ * @returns date as a string
+ */
 function getDateString(date: any) {
   if ( !date ) return ''
 
@@ -84,7 +98,7 @@ function getDateString(date: any) {
 
   if ( isNaN(time) ) return ''
 
-  const y = _date.getFullYear(),
+  const y = `${_date.getFullYear()}`.padStart(4, '0'),
         m = `${_date.getMonth()}`.padStart(2, '0'),
         d = `${_date.getDate()}`.padStart(2, '0')
 
