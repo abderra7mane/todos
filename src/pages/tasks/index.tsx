@@ -124,25 +124,35 @@ function getDateString(date: any) {
 }
 
 /**
- * Filter the list of tasks by the provided filter query.
+ * Filter the list of tasks by the provided 
+ * query, priority and status filters.
  * 
  * @param tasks Tasks list
  * @param query Filter query
+ * @param priorities task priority values
+ * @param statuses tasks status values
  */
-function getFilteredTasks(tasks: ITask[], query: string) {
-  if ( !query || !query.trim().length )
-    return tasks
-
-  const _query = query.toLowerCase()
-
+function getFilteredTasks(tasks: ITask[], query: string, 
+  priorities: TaskPriorityEnum[], statuses: TaskStatusEnum[]
+) {
   return tasks.filter(task => {
-    if ( task.title.toLowerCase().includes(_query) )
-      return true
+    const _query = query && query.trim().toLowerCase()
 
-    if ( task.description && task.description.toLowerCase().includes(_query) )
-      return true
+    if ( _query && _query.length ) {
+      if ( !task.title.toLowerCase().includes(_query) )
+        return false
+  
+      if ( task.description && !task.description.toLowerCase().includes(_query) )
+        return false
+    }
 
-    return false
+    if ( priorities.length && !priorities.includes(task.priority) )
+      return false
+
+    if ( statuses.length && !statuses.includes(task.status) )
+      return false
+
+    return true
   })
 }
 
@@ -383,21 +393,6 @@ export default function Signin() {
   }
 
   /**
-   * Empty state element.
-   */
-  const emptyState = (
-    <EmptyState
-      heading="Add some tasks to get started"
-      image="images/add-task.png"
-      action={{
-        content: 'Add Task', 
-        onAction: handleAddAction,
-        disabled: isLoading || error,
-      }}
-    />
-  )
-
-  /**
    * Filters element
    */
   const [taskPriorities, setTaskPriorities] = useState([])
@@ -488,8 +483,34 @@ export default function Signin() {
     setTaskStatuses([])
   }
 
-  const filteredTasks = getFilteredTasks(tasks, filterQuery)
+  const filteredTasks = getFilteredTasks(tasks, filterQuery, taskPriorities, taskStatuses)
 
+  /**
+   * Empty state element.
+   */
+  let emptyStateHeading = tasks.length ? 
+    'Add more tasks or clear the applied filters' : 
+    'Add some tasks to get started'
+  
+  let emptyStateSecondaryAction = tasks.length ? {
+    content: 'Clear All', 
+    onAction: handleClearAll,
+    disabled: isLoading || error,
+  } : null
+
+  const emptyState = filteredTasks.length ? null : (
+    <EmptyState
+      heading={emptyStateHeading}
+      image="images/add-task.png"
+      action={{
+        content: 'Add Task', 
+        onAction: handleAddAction,
+        disabled: isLoading || error,
+      }}
+      secondaryAction={emptyStateSecondaryAction}
+    />
+  )
+  
   /**
    * Task edit form modal.
    */
