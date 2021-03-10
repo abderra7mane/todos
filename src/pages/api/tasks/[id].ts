@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { deleteTask } from "../../../data/tasks"
-
-import { handleMethodNotAllowed } from "../../../utils/api"
+import { authorize, handleMethodNotAllowed, handleNotAuthorized } from "../../../utils/api"
 
 
 const ALLOWED_METHODS = ['DELETE']
@@ -20,14 +19,16 @@ export default (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 function handleDeleteTask(req: NextApiRequest, res: NextApiResponse) {
-  // TODO: verify token
-  
-  const id = req.query.id as string
-
-  return deleteTask(id).then((deleted) => 
-    res.status(200).json({
-      status: 'success',
-      data: deleted,
+  return authorize(req)
+    .then(() => 
+      deleteTask(req.query.id as string).then((deleted) => 
+        res.status(200).json({
+          status: 'success',
+          data: deleted,
+        })
+      )
+    )
+    .catch(() => {
+      handleNotAuthorized(res)
     })
-  )
 }
