@@ -138,13 +138,10 @@ function getFilteredTasks(tasks: ITask[], query: string,
   return tasks.filter(task => {
     const _query = query && query.trim().toLowerCase()
 
-    if ( _query && _query.length ) {
-      if ( !task.title.toLowerCase().includes(_query) )
-        return false
-  
-      if ( task.description && !task.description.toLowerCase().includes(_query) )
-        return false
-    }
+    if ( _query && _query.length && 
+        !task.title.toLowerCase().includes(_query) && 
+        task.description && !task.description.toLowerCase().includes(_query)
+    ) return false
 
     if ( priorities.length && !priorities.includes(task.priority) )
       return false
