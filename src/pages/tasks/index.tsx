@@ -11,7 +11,7 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import ITask, { TaskPriorityEnum, TaskStatusEnum } from '../../models/Task'
 import { addTask, deleteTask, getTasks, updateTask, updateTaskStatus } from '../../services/tasks'
-import { clearSessionToken, isAuthenticated } from '../../services/users'
+import { clearSessionData, getDisplayName, isAuthenticated } from '../../services/users'
 
 
 const priorityOptions = [
@@ -592,8 +592,7 @@ export default function Signin() {
     }
   ]
 
-  // TODO: change user model
-  const userName = "Abdou"
+  const userName = getDisplayName()
 
   const userMenu = (
     <TopBar.UserMenu
@@ -610,7 +609,7 @@ export default function Signin() {
   }
 
   function handleSignoutAction() {
-    clearSessionToken()
+    clearSessionData()
     router.push('/auth/signin')
   }
 

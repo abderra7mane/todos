@@ -1,6 +1,16 @@
 import IUser from "../models/User"
-import { EMAIL_REGEX, PASSWORD_MIN_LENGTH } from "./constants"
+import { EMAIL_REGEX, NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from "./constants"
 
+
+/**
+ * Validate the provided name address
+ * 
+ * @param name
+ * @returns true or false
+ */
+export function isNameValid(name: string) {
+  return typeof name === 'string' && name.length >= NAME_MIN_LENGTH
+}
 
 /**
  * Validate the provided email address

@@ -44,7 +44,11 @@ export default (req: NextApiRequest, res: NextApiResponse) => {
 
     // response
 
-    res.status(200).json({ token, email })
+    res.status(200).json({ 
+      token, 
+      email: user.email, 
+      name: user.name 
+    })
   })
 }
 

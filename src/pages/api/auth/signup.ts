@@ -1,6 +1,6 @@
 import { createUser, findUser } from "../../../data/users"
 import { handleInvalidData, handleMethodNotAllowed } from "../../../utils/api"
-import { isEmailValid, isPasswordValid, secureHashPassword } from "../../../utils/auth"
+import { isEmailValid, isNameValid, isPasswordValid, secureHashPassword } from "../../../utils/auth"
 
 
 const ALLOWED_METHODS = ['POST']
@@ -17,7 +17,11 @@ export default (req, res) => {
 
   // validate parameters
 
-  const { email, password } = body
+  const { name, email, password } = body
+
+  if ( !isNameValid(name) ) {
+    return handleInvalidData(res, 'name')
+  }
 
   if ( !isEmailValid(email) ) {
     return handleInvalidData(res, 'email')
@@ -39,6 +43,7 @@ export default (req, res) => {
     // add user
   
     return createUser({ 
+      name,
       email, 
       password: secureHashPassword(password)
     }).then((user) => {

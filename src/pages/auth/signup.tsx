@@ -6,21 +6,26 @@ import { FormikHelpers, useFormik } from 'formik'
 import * as Yup from 'yup'
 import { isAuthenticated, register } from '../../services/users'
 import { PASSWORD_MIN_LENGTH } from '../../utils/constants'
+import IUser from '../../models/User'
 import styles from '../../styles/auth.module.scss'
 
 
-const defaultValue = {
+const defaultValue: IUser = {
+  name: '',
   email: '',
   password: '',
 }
 
 const validationSchema = Yup.object({
+  name: Yup.string()
+    .min(3, 'Name must be 3 characters of more.')
+    .required('We would like to know how to address you :)'),
   email: Yup.string()
     .email('Invalid email address')
-    .required('Email address is required'),
+    .required('Please enter your email address to continue.'),
   password: Yup.string()
     .min(PASSWORD_MIN_LENGTH, `Must be ${PASSWORD_MIN_LENGTH} characters or more`)
-    .required('Password is required'),
+    .required('Choose a strong password to sign in.'),
 })
 
 
@@ -42,7 +47,7 @@ export default function Signup() {
       router.push('/tasks')
   }
 
-  function handleSubmit(user: any, actions: FormikHelpers<any>) {
+  function handleSubmit(user: IUser, actions: FormikHelpers<any>) {
     setError(null)
 
     register(user)
@@ -82,6 +87,14 @@ export default function Signup() {
                 <Form noValidate onSubmit={formik.handleSubmit}>
                   <FormLayout>
                     <TextField
+                      label="Name"
+                      value={formik.values.name}
+                      onChange={(value) => formik.setFieldValue('name', value)}
+                      error={formik.submitCount ? formik.errors.name as any : undefined}
+                      disabled={formik.isSubmitting}
+                    />
+
+                    <TextField
                       label="Email"
                       type="email"
                       value={formik.values.email}
@@ -89,7 +102,7 @@ export default function Signup() {
                       error={formik.submitCount ? formik.errors.email as any : undefined}
                       disabled={formik.isSubmitting}
                     />
-
+                    
                     <TextField
                       label="Password"
                       type="password"
