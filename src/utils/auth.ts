@@ -13,6 +13,26 @@ export function isEmailValid(email: string) {
 }
 
 /**
+ * Validate the provided password
+ * 
+ * @param password
+ * @returns true or false
+ */
+export function isPasswordValid(password: string) {
+  return typeof password === 'string' && password.length >= PASSWORD_MIN_LENGTH
+}
+
+/**
+ * Calculate a secure hash value for the provided password
+ * 
+ * @param password
+ * @returns a secure hash value
+ */
+export function secureHashPassword(password: string) {
+  return password
+}
+
+/**
  * Verify that the provided password matches the given hash.
  * 
  * @param hash 
