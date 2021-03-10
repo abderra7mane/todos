@@ -6,11 +6,11 @@ import {
   Card, ChoiceList, EmptyState, Filters, Form, FormLayout, Frame, Icon, Layout, Modal, 
   Page, ResourceItem, ResourceList, Select, Stack, TextContainer, TextField, TextStyle, TopBar 
 } from '@shopify/polaris'
-import { ClockMinor, DeleteMinor, EditMinor, LogOutMinor } from '@shopify/polaris-icons'
+import { CancelSmallMinor, ClockMinor, DeleteMinor, EditMinor, LogOutMinor, PlayMinor, TickMinor } from '@shopify/polaris-icons'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import ITask, { TaskPriorityEnum, TaskStatusEnum } from '../../models/Task'
-import { addTask, deleteTask, getTasks, updateTask } from '../../services/tasks'
+import { addTask, deleteTask, getTasks, updateTask, updateTaskStatus } from '../../services/tasks'
 import { clearSessionToken, isAuthenticated } from '../../services/users'
 
 
@@ -230,6 +230,48 @@ export default function Signin() {
   }
 
   /**
+   * Mark a task as canceled.
+   * 
+   * @param task 
+   */
+  function handleCancelAction(task: ITask) {
+    handleTaskStatusChange(task._id, TaskStatusEnum.Canceled)
+  }
+
+  /**
+   * Mark a task as started.
+   * 
+   * @param task 
+   */
+  function handleStartAction(task: ITask) {
+    handleTaskStatusChange(task._id, TaskStatusEnum.Started)
+  }
+
+  /**
+   * Mark a task as done.
+   * 
+   * @param task 
+   */
+  function handleDoneAction(task: ITask) {
+    handleTaskStatusChange(task._id, TaskStatusEnum.Done)}
+
+
+  function handleTaskStatusChange(id: string, status: TaskStatusEnum) {
+    setError(null)
+    setIsLoading(true)
+
+    updateTaskStatus(id, status)
+      .then(() => {
+        setIsLoading(false)
+        fetchTasks()
+      })
+      .catch((error) => {
+        setError(error.message)
+        setIsLoading(false)
+      })
+  }
+
+  /**
    * Close task edit form dialog and reset form values.
    */
   function handleCloseEditDialog() {
@@ -278,14 +320,37 @@ export default function Signin() {
   function renderTaskItem(task: ITask) {
     const shortcutActions = [
       { 
-        content: <Icon source={EditMinor} />,
-        onAction: () => handleEditAction(task),
-      },
-      { 
         content: <Icon source={DeleteMinor} />,
         onAction: () => handleDeleteAction(task._id),
       },
     ]
+
+    const editAction = { 
+      content: <Icon source={EditMinor} />,
+      onAction: () => handleEditAction(task),
+    }
+
+    const cancelAction = {
+      content: <Icon source={CancelSmallMinor} />,
+      onAction: () => handleCancelAction(task),
+    }
+
+    if ( task.status === TaskStatusEnum.New ) {
+      const startAction = {
+        content: <Icon source={PlayMinor} />,
+        onAction: () => handleStartAction(task),
+      }
+
+      shortcutActions.unshift(startAction, cancelAction, editAction)
+    }
+    else if ( task.status === TaskStatusEnum.Started ) {
+      const doneAction = {
+        content: <Icon source={TickMinor} />,
+        onAction: () => handleDoneAction(task),
+      }
+
+      shortcutActions.unshift(doneAction, cancelAction, editAction)
+    }
 
     const props: any = { id: task._id, shortcutActions }
 

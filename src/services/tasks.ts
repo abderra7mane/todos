@@ -1,4 +1,4 @@
-import ITask from "../models/Task"
+import ITask, { TaskStatusEnum } from "../models/Task"
 import { 
   apiAuthorizedDelete, apiAuthorizedGet, 
   apiAuthorizedPost, apiAuthorizedPut 
@@ -17,6 +17,11 @@ export function addTask(task: ITask): Promise<string> {
 
 export function updateTask(task: ITask): Promise<boolean> {
   return apiAuthorizedPut('/api/tasks', task)
+    .then(({ data: { data }}) => data)
+}
+
+export function updateTaskStatus(id: string, status: TaskStatusEnum): Promise<boolean> {
+  return apiAuthorizedPut('/api/tasks', { _id: id, status })
     .then(({ data: { data }}) => data)
 }
 
