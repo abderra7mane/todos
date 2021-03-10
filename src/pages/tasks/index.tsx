@@ -4,9 +4,9 @@ import { useRouter } from 'next/router'
 import { 
   Banner,
   Card, EmptyState, Form, FormLayout, Frame, Icon, Layout, Modal, 
-  Page, ResourceItem, ResourceList, Select, Stack, TextField, TextStyle, TopBar 
+  Page, ResourceItem, ResourceList, Select, Stack, TextContainer, TextField, TextStyle, TopBar 
 } from '@shopify/polaris'
-import { DeleteMinor, EditMinor, LogOutMinor } from '@shopify/polaris-icons'
+import { ClockMinor, DeleteMinor, EditMinor, LogOutMinor } from '@shopify/polaris-icons'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import ITask, { TaskPriorityEnum, TaskStatusEnum } from '../../models/Task'
@@ -59,6 +59,37 @@ const validationSchema = Yup.object({
   tags: Yup.array().of(Yup.string()),
   attachments: Yup.array().of(Yup.object())
 })
+
+
+function getInputDateString(date: any) {
+  if ( !date ) return ''
+
+  const _date = new Date(date);
+  const time = _date.getTime()
+
+  if ( isNaN(time) ) return ''
+
+  const y = _date.getFullYear(),
+        m = `${_date.getMonth()}`.padStart(2, '0'),
+        d = `${_date.getDate()}`.padStart(2, '0')
+
+  return `${y}-${m}-${d}`
+}
+
+function getDateString(date: any) {
+  if ( !date ) return ''
+
+  const _date = new Date(date);
+  const time = _date.getTime()
+
+  if ( isNaN(time) ) return ''
+
+  const y = _date.getFullYear(),
+        m = `${_date.getMonth()}`.padStart(2, '0'),
+        d = `${_date.getDate()}`.padStart(2, '0')
+
+  return `${d}/${m}/${y}`
+}
 
 
 export default function Signin() {
@@ -201,13 +232,30 @@ export default function Signin() {
 
     const props: any = { id: task._id, shortcutActions }
 
+    const due = task.due ? (
+      <Stack.Item>
+        <Stack spacing="tight" alignment="center">
+          <Icon source={ClockMinor} />
+          <div>Due: {getDateString(task.due)}</div>
+        </Stack>
+      </Stack.Item>
+    ) : null
+
     return (
       <ResourceItem {...props}>
-        <h3>
-          <TextStyle variation="strong">{task.title}</TextStyle>
-        </h3>
+        <Stack distribution="equalSpacing" alignment="trailing">
+          <Stack spacing="tight" vertical>
+            <h3>
+              <TextStyle variation="strong">{task.title}</TextStyle>
+            </h3>
 
-        <div>{task.description}</div>
+            <TextContainer>
+              <p>{task.description}</p>
+            </TextContainer>
+          </Stack>
+
+          {due}
+        </Stack>
       </ResourceItem>
     )
   }
@@ -268,9 +316,9 @@ export default function Signin() {
 
             <TextField
               label="Due Date"
-              value={(formik.values.due as any)}
-              type="datetime-local"
-              onChange={(value) => formik.setFieldValue('due', new Date(value))}
+              value={getInputDateString(formik.values.due)}
+              type="date"
+              onChange={(value) => formik.setFieldValue('due', value)}
               error={formik.submitCount ? (formik.errors.due as any) : undefined}
             />
 
