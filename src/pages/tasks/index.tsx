@@ -6,7 +6,7 @@ import {
   Page, ResourceItem, ResourceList, Select, SkeletonBodyText, SkeletonDisplayText, SkeletonPage, 
   Stack, TextContainer, TextField, TextStyle, TopBar 
 } from '@shopify/polaris'
-import { CancelSmallMinor, ClockMinor, DeleteMinor, EditMinor, LogOutMinor, PlayMinor, TickMinor } from '@shopify/polaris-icons'
+import { CircleDisableMinor, ClockMinor, DeleteMinor, DraftOrdersMajor, EditMinor, LogOutMinor, PlayMinor, TickMinor } from '@shopify/polaris-icons'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import ITask, { TaskPriorityEnum, TaskStatusEnum } from '../../models/Task'
@@ -345,7 +345,7 @@ export default function Signin() {
     }
 
     const cancelAction = {
-      content: <Icon source={CancelSmallMinor} />,
+      content: <Icon source={CircleDisableMinor} />,
       onAction: () => handleCancelAction(task),
     }
 
@@ -377,18 +377,35 @@ export default function Signin() {
       </Stack.Item>
     ) : null
 
+    const iconColors = {
+      [TaskStatusEnum.New]: 'subdued',
+      [TaskStatusEnum.Started]: 'highlight',
+      [TaskStatusEnum.Done]: 'success',
+      [TaskStatusEnum.Canceled]: 'critical',
+    }
+
+    const iconColor: any = iconColors[task.status]
+
     return (
       <ResourceItem {...props}>
-        <Stack distribution="equalSpacing" alignment="trailing">
-          <Stack spacing="tight" vertical>
-            <h3>
-              <TextStyle variation="strong">{task.title}</TextStyle>
-            </h3>
+        <Stack distribution="equalSpacing" alignment="trailing" wrap={false}>
+          <Stack.Item fill>
+            <Stack alignment="leading" wrap={false}>
+              <Icon source={DraftOrdersMajor} color={iconColor} />
 
-            <TextContainer>
-              <p>{task.description}</p>
-            </TextContainer>
-          </Stack>
+              <Stack.Item fill>
+                <Stack spacing="tight" vertical>
+                  <h3>
+                    <TextStyle variation="strong">{task.title}</TextStyle>
+                  </h3>
+
+                  <TextContainer>
+                    <p>{task.description}</p>
+                  </TextContainer>
+                </Stack>
+              </Stack.Item>
+            </Stack>
+          </Stack.Item>
 
           {due}
         </Stack>
