@@ -1,12 +1,12 @@
-import UserModel from "./schema/User"
+import UsersStore from "./store/Users"
 import IUser from "../models/User"
-import { createQuery, getOneQuery } from "./utils"
+import { createQuery, getOneQuery } from "./store/utils"
 
 
 export function createUser(user: IUser): Promise<string> {
-  return createQuery({ ...user, returnId: true }, UserModel)
+  return createQuery({ ...user, returnId: true }, UsersStore)
 }
 
 export function findUser(email: string): Promise<IUser> {
-  return getOneQuery({ query: { email } }, UserModel)
+  return getOneQuery({ query: { email } }, UsersStore)
 }
