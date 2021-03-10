@@ -4,16 +4,29 @@ import { useRouter } from 'next/router'
 import { 
   Banner,
   Card, EmptyState, Form, FormLayout, Frame, Icon, Layout, Modal, 
-  Page, ResourceItem, ResourceList, Stack, TextField, TextStyle, TopBar 
+  Page, ResourceItem, ResourceList, Select, Stack, TextField, TextStyle, TopBar 
 } from '@shopify/polaris'
 import { DeleteMinor, EditMinor, LogOutMinor } from '@shopify/polaris-icons'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import ITask, { TaskPriorityEnum, TaskStatusEnum } from '../../models/Task'
-import { oneOfEnum } from '../../utils/forms'
 import { addTask, deleteTask, getTasks, updateTask } from '../../services/tasks'
 import { clearSessionToken, isAuthenticated } from '../../services/users'
 
+
+const priorityOptions = [
+  { label: 'Normal', value: 1 },
+  { label: 'Priority', value: 2 },
+  { label: 'Critical', value: 3 },
+  { label: 'Urgent', value: 4 },
+]
+
+const statusOptions = [
+  { label: 'New', value: 1 },
+  { label: 'Started', value: 2 },
+  { label: 'Done', value: 3 },
+  { label: 'Canceled', value: 4 },
+]
 
 /**
  * Initial value for a new task.
@@ -41,8 +54,8 @@ const validationSchema = Yup.object({
     .required('Title is required'),
   description: Yup.string(),
   due: Yup.date().nullable(true),
-  status: oneOfEnum(TaskStatusEnum),
-  priority: oneOfEnum(TaskPriorityEnum),
+  status: Yup.number().oneOf(statusOptions.map(o => o.value)),
+  priority: Yup.number().oneOf(priorityOptions.map(o => o.value)),
   tags: Yup.array().of(Yup.string()),
   attachments: Yup.array().of(Yup.object())
 })
@@ -259,6 +272,14 @@ export default function Signin() {
               type="datetime-local"
               onChange={(value) => formik.setFieldValue('due', new Date(value))}
               error={formik.submitCount ? (formik.errors.due as any) : undefined}
+            />
+
+            <Select
+              label="Priority"
+              options={priorityOptions as any}
+              value={formik.values.priority as any}
+              onChange={(value) => formik.setFieldValue('priority', value)}
+              error={formik.submitCount ? (formik.errors.priority as any) : undefined}
             />
           </FormLayout>
         </Form>
