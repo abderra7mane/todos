@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios"
 import Router from "next/router"
-import { getSessionToken } from "./users";
+import { clearSessionData, getSessionToken } from "./users";
 
 
 /**
@@ -12,8 +12,10 @@ export function axiosHandleError(error: AxiosError): any {
   if (error.response) {
     const { status, data } = error.response;
 
-    if ( status === 401 )
+    if ( status === 401 ) {
       Router.push('/auth/signin')
+      clearSessionData()
+    }
     
     if ( data ) {
       if ( typeof data === 'object' && data.error )

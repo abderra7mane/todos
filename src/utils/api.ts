@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { extractTokenData } from "./auth"
+import { extractTokenData, verifyAuthToken } from "./auth"
 
 /**
  * Handles not allowed methods.
@@ -55,7 +55,7 @@ export function handleNotAuthorized(res: NextApiResponse) {
 export function authorize(req: NextApiRequest): Promise<any> {
   const token = getAuthorizationToken(req)
 
-  if ( !token )
+  if ( ! verifyAuthToken(token) )
     return Promise.reject()
 
   const data = extractTokenData(token)

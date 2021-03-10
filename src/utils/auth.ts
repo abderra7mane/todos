@@ -1,5 +1,9 @@
+import jwt from 'jsonwebtoken'
 import IUser from "../models/User"
-import { EMAIL_REGEX, NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH } from "./constants"
+import { 
+  EMAIL_REGEX, JWT_EXPIRATION_TIME, JWT_SECRET, 
+  NAME_MIN_LENGTH, PASSWORD_MIN_LENGTH 
+} from './constants'
 
 
 /**
@@ -38,7 +42,7 @@ export function isPasswordValid(password: string) {
  * @param password
  * @returns a secure hash value
  */
-export function secureHashPassword(password: string) {
+export function secureHashPassword(password: string): string {
   return password
 }
 
@@ -49,7 +53,7 @@ export function secureHashPassword(password: string) {
  * @parampassword 
  * @returns true or false
  */
-export function verifyPassword(hash: string, password: string) {
+export function verifyPassword(hash: string, password: string): boolean {
   return hash === password
 }
 
@@ -59,8 +63,9 @@ export function verifyPassword(hash: string, password: string) {
  * @param user 
  * @returns secure authentication token
  */
-export function generateAuthToken(user: IUser) {
-  return Buffer.from(`${user._id}:${user.email}`).toString('base64')
+export function generateAuthToken(user: IUser): string {
+  const payload = { id: user._id, email: user.email }
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION_TIME })
 }
 
 /**
@@ -69,14 +74,13 @@ export function generateAuthToken(user: IUser) {
  * @param token 
  * @returns token data or undefined
  */
-export function extractTokenData(token: string) {
+export function extractTokenData(token: string): {user: string, email: string} {
   try {
-    const data = Buffer.from(token, 'base64').toString()
-    const [user, email] = data.split(':')
-    return {user, email}
+    const decoded: any = jwt.verify(token, JWT_SECRET)
+    return {user: decoded.id, email: decoded.email}
   }
-  catch (e) {
-    console.error(e)
+  catch (_) {
+    return null
   }
 }
 
@@ -85,9 +89,14 @@ export function extractTokenData(token: string) {
  * and was generated for the given email.
  * 
  * @param token 
- * @param email 
  * @returns true or false
  */
-export function verifyAuthToken(token: string, email: string) {
-  return extractTokenData(token).email === email
+export function verifyAuthToken(token: string): boolean {
+  try {
+    jwt.verify(token, JWT_SECRET)
+    return true
+  }
+  catch (_) {
+    return false
+  }
 }
