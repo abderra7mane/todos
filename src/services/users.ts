@@ -21,3 +21,14 @@ export function register(user: any) {
   return apiPost('/api/auth/signup', user)
     .then(({ data }) => data.data)
 }
+
+export function authenticate(user: any) {
+  return apiPost('/api/auth/signin', user)
+    .then(({ data }) => {
+      setSessionToken(data.token)
+    })
+}
+
+function setSessionToken(token: string) {
+  sessionStorage.setItem('__auth_token', _authToken = token)
+}
