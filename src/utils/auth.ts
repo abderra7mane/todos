@@ -52,3 +52,32 @@ export function verifyPassword(hash: string, password: string) {
 export function generateAuthToken(user: IUser) {
   return Buffer.from(`${user._id}:${user.email}`).toString('base64')
 }
+
+/**
+ * Get plain data used to generate the token.
+ * 
+ * @param token 
+ * @returns token data or undefined
+ */
+export function extractTokenData(token: string) {
+  try {
+    const data = Buffer.from(token, 'base64').toString()
+    const [user, email] = data.split(':')
+    return {user, email}
+  }
+  catch (e) {
+    console.error(e)
+  }
+}
+
+/**
+ * Verify that the provided token is valid 
+ * and was generated for the given email.
+ * 
+ * @param token 
+ * @param email 
+ * @returns true or false
+ */
+export function verifyAuthToken(token: string, email: string) {
+  return extractTokenData(token).email === email
+}
