@@ -6,11 +6,17 @@ let _displayName = null
 
 
 export function getSessionToken() {
-  return _authToken || (_authToken = sessionStorage.getItem('__auth_token'))
+  if ( _authToken ) 
+    return _authToken
+  else if ( typeof window !== 'undefined' )
+    return (_authToken = sessionStorage.getItem('__auth_token'))
 }
 
 export function getDisplayName() {
-  return _displayName || (_displayName = sessionStorage.getItem('__display_name'))
+  if ( _displayName ) 
+    return _displayName
+  else if ( typeof window !== 'undefined' )
+    return (_displayName = sessionStorage.getItem('__display_name'))
 }
 
 export function isAuthenticated() {
@@ -20,8 +26,11 @@ export function isAuthenticated() {
 export function clearSessionData() {
   _authToken = null
   _displayName = null
-  sessionStorage.removeItem('__auth_token')
-  sessionStorage.removeItem('__display_name')
+  
+  if ( typeof window !== 'undefined' ) {
+    sessionStorage.removeItem('__auth_token')
+    sessionStorage.removeItem('__display_name')
+  }
 }
 
 export function register(user: any) {
@@ -38,9 +47,11 @@ export function authenticate(user: any) {
 }
 
 function setSessionToken(token: string) {
-  sessionStorage.setItem('__auth_token', _authToken = token)
+  if ( typeof window !== 'undefined' )
+    sessionStorage.setItem('__auth_token', _authToken = token)
 }
 
 function setDisplayName(name: string) {
-  sessionStorage.setItem('__display_name', _displayName = name)
+  if ( typeof window !== 'undefined' )
+    sessionStorage.setItem('__display_name', _displayName = name)
 }

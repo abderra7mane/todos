@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { 
-  Banner,
-  Card, ChoiceList, EmptyState, Filters, Form, FormLayout, Frame, Icon, Layout, Modal, 
-  Page, ResourceItem, ResourceList, Select, Stack, TextContainer, TextField, TextStyle, TopBar 
+  Banner, Card, ChoiceList, EmptyState, Filters, Form, FormLayout, Frame, Icon, Layout, Modal, 
+  Page, ResourceItem, ResourceList, Select, SkeletonBodyText, SkeletonDisplayText, SkeletonPage, 
+  Stack, TextContainer, TextField, TextStyle, TopBar 
 } from '@shopify/polaris'
 import { CancelSmallMinor, ClockMinor, DeleteMinor, EditMinor, LogOutMinor, PlayMinor, TickMinor } from '@shopify/polaris-icons'
 import { useFormik } from 'formik'
@@ -155,6 +155,8 @@ function getFilteredTasks(tasks: ITask[], query: string,
 
 
 export default function Signin() {
+  const [renderPage, setRenderPage] = useState(false)
+  
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   
@@ -174,10 +176,13 @@ export default function Signin() {
   })
   
   useEffect(() => {
-    if ( isAuthenticated() )
+    if ( isAuthenticated() ) {
       fetchTasks()
-    else
+    }
+    else {
+      clearSessionData()
       router.push('/auth/signin')
+    }
   }, [])
 
   /**
@@ -191,6 +196,7 @@ export default function Signin() {
       .then((tasks) => {
         setTasks(tasks)
         setIsLoading(false)
+        setRenderPage(true)
       })
       .catch((error) => {
         setError(error.message)
@@ -260,7 +266,8 @@ export default function Signin() {
    * @param task 
    */
   function handleDoneAction(task: ITask) {
-    handleTaskStatusChange(task._id, TaskStatusEnum.Done)}
+    handleTaskStatusChange(task._id, TaskStatusEnum.Done)
+  }
 
 
   function handleTaskStatusChange(id: string, status: TaskStatusEnum) {
@@ -623,42 +630,72 @@ export default function Signin() {
     />
   )
 
-  return (
-    <Frame
-      topBar={topBar}
-    >
-      <Page 
-        title="Todo List"
-        primaryAction={{ 
-          content: 'Add Task', 
-          onAction: handleAddAction,
-          disabled: isLoading || error,
-        }}
-      >
-        <Head>
-          <title>Todo List</title>
-        </Head>
+  let page = (
+    <SkeletonPage title="Todo List" primaryAction>
+      <Layout>
+        <Layout.Section>
+          <Card sectioned>
+            <SkeletonBodyText />
+          </Card>
 
-        <Layout>
-          <Layout.Section>
-            {editModal}
-
-            <Stack vertical>
-              {errorBanner}
-
-              <Card>
-                <ResourceList 
-                  items={filteredTasks}
-                  renderItem={renderTaskItem}
-                  emptyState={emptyState}
-                  filterControl={filterControl}
-                  loading={isLoading}
-                />
-              </Card>
-            </Stack>
-          </Layout.Section>
-        </Layout>
-      </Page>
-    </Frame>
+          <Card sectioned>
+            <TextContainer>
+              <SkeletonDisplayText size="small" />
+              <SkeletonBodyText />
+            </TextContainer>
+          </Card>
+          
+          <Card sectioned>
+            <TextContainer>
+              <SkeletonDisplayText size="small" />
+              <SkeletonBodyText />
+            </TextContainer>
+          </Card>
+        </Layout.Section>
+      </Layout>
+    </SkeletonPage>
   )
+
+  if ( renderPage ) {
+    page = (
+      <Frame
+        topBar={topBar}
+      >
+        <Page 
+          title="Todo List"
+          primaryAction={{ 
+            content: 'Add Task', 
+            onAction: handleAddAction,
+            disabled: isLoading || error,
+          }}
+        >
+          <Head>
+            <title>Todo List</title>
+          </Head>
+
+          <Layout>
+            <Layout.Section>
+              {editModal}
+
+              <Stack vertical>
+                {errorBanner}
+
+                <Card>
+                  <ResourceList 
+                    items={filteredTasks}
+                    renderItem={renderTaskItem}
+                    emptyState={emptyState}
+                    filterControl={filterControl}
+                    loading={isLoading}
+                  />
+                </Card>
+              </Stack>
+            </Layout.Section>
+          </Layout>
+        </Page>
+      </Frame>
+    )
+  }
+
+  return page
 }
